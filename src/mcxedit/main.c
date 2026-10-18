@@ -186,6 +186,13 @@ int main(int argc, char **argv)
 	/* Loop through the remaining options given in argv (files). */
 	int    err = 0;
 	char **pat = argv + optind;
+	if (!*pat) {
+		/* FIX: This bloody mess, I'd like the compiler to understand
+		 * that it can just take the substring for the ? case above. */
+		fprintf(stderr, "Expected input files\n");
+		fprintf(stderr, "Try '%s -h' for help.\n", *argv);
+		return 1;
+	}
 	while (!signaled && *pat)
 		err |= procmcx(*pat++, opt);
 	return signaled ? signaled + 128 : err;
