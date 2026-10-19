@@ -3,7 +3,7 @@
  */
 #include <libmcx/mcx.h>
 
-#include <assert.h>
+#include <errno.h>
 #include <libmcx/types.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,8 +17,10 @@ struct mcx {
 
 off_t mcx_repair(struct mcx *mcx, off_t size)
 {
-	assert(!((uintptr_t)mcx & 3));
-	assert(size > MCX_TABLES_SIZE);
+	if (size < MCX_TABLES_SIZE)
+		return -EINVAL;
+	if (size & 3)
+		return -EINVAL;
 	be32 *tbl = mcx->table;
 	be32 *end = tbl + MCX_TABLE_ITEMS;
 	u32   chpos, chlen, chend;
@@ -56,8 +58,10 @@ static int mcx_defrag_compar(const void *ma, const void *mb)
  * Then move the chunks down into empty space. */
 off_t mcx_defrag(struct mcx *mcx, off_t size)
 {
-	assert(!((uintptr_t)mcx & 3));
-	assert(size > MCX_TABLES_SIZE);
+	if (size < MCX_TABLES_SIZE)
+		return -EINVAL;
+	if (size & 3)
+		return -EINVAL;
 	u32   chunks[MCX_TABLE_ITEMS * 2];
 	u32  *chunk = chunks;
 	be32 *tbl   = mcx->table;
@@ -99,7 +103,8 @@ next_table_item:
 
 off_t mcx_calcsize(const struct mcx *mcx)
 {
-	assert(!((uintptr_t)mcx & 3));
+	if ((uintptr_t)mcx & 3)
+		return -EINVAL;
 	const be32 *tbl = mcx->table;
 	const be32 *end = tbl + MCX_TABLE_ITEMS;
 	u32         max = 0, tmp;

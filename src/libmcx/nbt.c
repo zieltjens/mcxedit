@@ -4,7 +4,6 @@
 #include <libmcx/nbt.h>
 
 #include "endian.h"
-#include <assert.h>
 #include <errno.h>
 #include <libmcx/error.h>
 #include <libmcx/types.h>
