@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <libmcx/mcx.h>
+#include <libmcx/stddef.h>
 #include <libmcx/types.h>
 #include <signal.h>
 #include <stdint.h>
@@ -27,6 +28,28 @@ enum options {
 
 const char *argv0;
 static int  signaled = 0;
+
+static inline MCX_NORET void help_short(int code)
+{
+	fprintf(stderr,  "Try '%s -h' for help.\n", argv0);
+	exit(code);
+}
+static inline MCX_NORET void help_extended(int code)
+{
+	fprintf(stderr,
+	"%s [options] /path/to/region1 ...\n"
+	"Options:\n"
+	"  -G: defra[G]ment  Removes empty sectors from the file.\n"
+	"  -R: [R]epair      Identifies and repairs faults within the file.\n"
+	"  -c  [c]heck       Performs more thorough checks on the file.\n"
+	"  -q: [q]uiet       Silences most error output.\n"
+	"  -v: [v]erbose     Outputs more detailed information.\n"
+	"  -V: [V]ersion     Outputs version information & exits.\n"
+	"  -h: [h]elp        Shows this output & exits.\n"
+	"View mcxedit(1) for more information.\n",
+	argv0);
+	exit(code);
+}
 
 static int remap_truncate(struct file f, void **map, off_t oldsize, off_t newsize, int need_write)
 {
@@ -163,22 +186,9 @@ int main(int argc, char **argv)
 			printf("%s: %s\n", *argv, MCXEDIT_VERSION);
 			return 0;
 		case 'h':
-			printf(
-				"%s [options] /path/to/region1 ...\n"
-				"Options:\n"
-				"  -G: defra[G]ment  Removes empty sectors from the file.\n"
-				"  -R: [R]epair      Identifies and repairs faults within the file.\n"
-				"  -c  [c]heck       Performs more thorough checks on the file.\n"
-				"  -q: [q]uiet       Silences most error output.\n"
-				"  -v: [v]erbose     Outputs more detailed information.\n"
-				"  -V: [V]ersion     Outputs version information & exits.\n"
-				"  -h: [h]elp        Shows this output & exits.\n"
-				"View mcxedit(1) for more information.\n",
-				*argv);
-			return 0;
+			help_extended(0);
 		case '?':
-			fprintf(stderr, "Try '%s -h' for help.\n", *argv);
-			return 1;
+			help_short(1);
 		default: errx(-SIGABRT, "Unhandled flag -- '%c', please report this bug.", o);
 		}
 	}
@@ -187,11 +197,8 @@ int main(int argc, char **argv)
 	int    err = 0;
 	char **pat = argv + optind;
 	if (!*pat) {
-		/* FIX: This bloody mess, I'd like the compiler to understand
-		 * that it can just take the substring for the ? case above. */
-		fprintf(stderr, "Expected input files\n");
-		fprintf(stderr, "Try '%s -h' for help.\n", *argv);
-		return 1;
+		warnx("Expected input files");
+		help_short(1);
 	}
 	while (!signaled && *pat)
 		err |= procmcx(*pat++, opt);
