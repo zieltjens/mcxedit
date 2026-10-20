@@ -132,11 +132,9 @@ libmcx.so libmcx.dll: ${libmcx-obj}
 	@${msg} GZIP $@
 	$Qgzip -fk $<
 
-# Manpage generation
-man/%: man/%.rst
-	@${msg} RST2MAN $@
-	${Q}sed 's/@@VERSION@@/'${VERONLY}'/g;'\
-	's/@@DATE@@/'$(shell date +%Y-%m-%d)'/g' $< | rst2man >$@
+man/%.gz: man/% FORCE
+	$Qsed 's/(unknown-date)/'$(shell date +%Y-%m-%d)'/g;'\
+	's/(unknown-version)/'${VERONLY}'/g;' $< | gzip > $@
 
 # Uses "find" to clean, since it'll have a better result
 # It does have the potential side-effect of deleting unintended files,

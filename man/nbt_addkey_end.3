@@ -1,0 +1,187 @@
+\" SPDX-License-Identifier: BSD-2-Clause
+\" SPDX-FileCopyrightText: ©2026 Quinn Zieltjens <zieltjens@pigeonware.org>
+.TH nbt_addkey_end 3 (unknown-date) "mcxedit (unknown-version)"
+.SH NAME
+nbt_addkey_end, nbt_addkey_int, nbt_addkey_float, nbt_addkey_arr,
+nbt_addkey_str, nbt_addkey_list, nbt_addkey_compund \- create a NBT tree
+
+.SH LIBRARY
+libmcx
+.RI ( libmcx ,\~ \-lmcx )
+
+.SH SYNOPSIS
+.nf
+.B #include <libmcx/nbt.h>
+.B #include <stdint.h>
+.B #include <sys/types.h>
+.P
+.BI "ssize_t nbt_addkey_end(uint8_t *" buf ", uint8_t *" max );
+.P
+.BI "ssize_t nbt_addkey_int(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", enum nbt_tagid " id ,
+.BI "                            uint64_t " value );
+.P
+.BI "ssize_t nbt_addkey_float(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", enum nbt_tagid " id ,
+.BI "                            double " value );
+.P
+.BI "ssize_t nbt_addkey_arr(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", enum nbt_tagid " id ,
+.BI "                            int32_t " length ", const void *" data );
+.P
+.BI "ssize_t nbt_addkey_str(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", const char *" value );
+.P
+.BI "ssize_t nbt_addkey_list(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", enum nbt_tagid " id ,
+.BI "                            int32_t " length );
+.P
+.BI "ssize_t nbt_addkey_compound(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name );
+
+.SH DESCRIPTION
+Creates the specified NBT (or a category of NBT).
+.P
+.I buf
+is the location at which this tag will be written, with
+.I max
+being the (exclusive) upper limit.
+.P
+.I name
+is used to provide tags with their name.
+This must be a null-terminated string or NULL.
+If NULL is given, the name field is omitted entirely, this is only correct in
+lists, for an empty name use "" or "\\0".
+The maximum number of characters (excluding 0 terminating byte) is 0xFFFF,
+or 65535.
+.P
+when
+.I id
+is specified, different values are valid depending on the function:
+.TP
+.B nbt_addkey_int()
+accepts
+.BR NBT_S8 ,\~ NBT_S16 ,\~ NBT_S32 ,\~ NBT_S64
+.TP
+.BR nbt_addkey_float()
+accepts
+.BR NBT_F32 ,\~ NBT_F64
+.TP
+.B nbt_addkey_arr()
+accepts
+.BR NBT_ARR_S8 ,\~ NBT_ARR_S32 ,\~ NBT_ARR_S64
+.TP
+.B nbt_addkey_list()
+accepts any value from enum nbt_tagid.
+.P
+.I length
+must be a positive integer, specifying the amount of items this tag holds.
+0 is a valid value for this.
+.P
+.I value
+contains the value of this key. For
+.B nbt_addkey_str()
+.I value
+will be a pointer to a null-terminated string, with the maximum number of
+characters (excluding 0 terminating byte) is 0xFFFF, or 65535.
+.P
+.I data
+is similar to
+.I value
+except that it is expected to be a pointer to an array of
+.IR length " elements, all of which are the size described by " id .
+
+.SH RETURN VALUE
+On success, all of these functions will return the amount of bytes written.
+On failure, a number <0 is returned, encoding the error as -error.
+The error string should be extracted using
+.BR mcx_strerror (3).
+
+.SH ERRORS
+.RB "Note: the tag may still have been written partially except for " EINVAL .
+.TP
+.B EFAULT
+.RI "Write would exceed " max .
+.TP
+.B EINVAL
+The provided arguments are invalid.
+See the
+.BR DESCRIPTION " section for more information."
+.TP
+.B EOVERFLOW
+The provided string in
+.IR name " or " value " exceeded 0xFFFF, or 65535."
+
+.SH EXAMPLES
+.P
+All examples use the following definitions:
+.P
+.EX
+uint8_t nbtdat[0x1000]; /* 4KiB ought to be enough. */
+uint8_t nbtdatmax = nbtdat + sizeof(nbtdat);
+
+[[noreturn]] void addkey_error(int e)
+{
+	fputs(mcx_strerror(e), stderr);
+	exit(1);
+}
+.EE
+.P
+It is worth noting that the error handling can be safely omitted in most
+scenarios, or extracted to wrapper functions.
+This is beyond the scope of this example, and the example should demonstrate
+the so-called proper way to interface with these functions,
+rather than tell people to not handle errors.
+
+.SS Creating a list containing strings
+.EX
+ssize_t n;
+uint8_t *buf = nbtdat;
+
+n = nbt_addkey_list(buf, nbtdatmax, "list", NBT_STR, 3);
+if (n < 0) addkey_error(-n);
+buf += n;
+
+n = nbt_addkey_str(buf, nbtdatmax, NULL, "foo");
+if (n < 0) addkey_error(-n);
+buf += n;
+
+n = nbt_addkey_str(buf, nbtdatmax, NULL, "bar");
+if (n < 0) addkey_error(-n);
+buf += n;
+
+n = nbt_addkey_str(buf, nbtdatmax, NULL, "baz");
+if (n < 0) addkey_error(-n);
+buf += n;
+.EE
+
+.SS Creating a compound
+.EX
+ssize_t n;
+uint8_t *buf = nbtdat;
+
+n = nbt_addkey_compound(buf, nbtdatmax, "");
+if (n < 0) addkey_error(-n);
+buf += n;
+
+n = nbt_addkey_str(buf, nbtdatmax, "some string", "foo");
+if (n < 0) addkey_error(-n);
+buf += n;
+
+n = nbt_addkey_int(buf, nbtdatmax, "some 64 bit integer", 0x5050505050505050);
+if (n < 0) addkey_error(-n);
+buf += n;
+
+int8_t arr[] = "Some long string that exceeds 0xFFFF, let's just pretend...";
+n = nbt_addkey_arr(buf, nbtdatmax, NBT_ARR_S8, sizeof(arr), arr);
+if (n < 0) addkey_error(-n);
+buf += n;
+
+n = nbt_addkey_end(buf, nbtdatmax);
+if (n < 0) addkey_error(-n);
+buf += n;
+.EE
+
+.SH SEE ALSO
+.BR mcx_strerror (3),
+.BR nbt_taglen (3)

@@ -1,0 +1,64 @@
+\" SPDX-License-Identifier: BSD-2-Clause
+\" SPDX-FileCopyrightText: ©2026 Quinn Zieltjens <zieltjens@pigeonware.org>
+.TH nbt_taglen 3 (unknown-date) "mcxedit (unknown-version)"
+.SH NAME
+nbt_taglen \- gets the length of a given NBT
+
+.SH LIBRARY
+libmcx
+.RI ( libmcx ,\~ \-lmcx )
+
+.SH SYNOPSIS
+.nf
+.B #include <libmcx/nbt.h>
+.B #include <stdint.h>
+.B #include <sys/types.h>
+.P
+.BI "ssize_t nbt_taglen(const uint8_t *" tag ", ssize_t " maxlen ,
+.BI "                   int " root ", struct nbt_cache *" cache );
+
+.SH DESCRIPTION
+.P
+.I tag
+is a pointer to the start of the NBT
+.P
+.I maxlen
+is the maximum number of bytes the NBT can be (inclusive).
+Must be a value >=0.
+.P
+.I root
+is the current depth we're parsing from, to ensure
+.BR NBT_NEST_MAX " is respected."
+.RB "Must be a value 0..." NBT_NEST_MAX .
+.P
+.I cache
+TODO: the cache as it stands is broken,
+writing a description for this is pointless as it'll change dramatically.
+
+.SH RETURN VALUE
+On success,
+.B nbt_taglen()
+returns the number of bytes that this tag occupies.
+On failure, a number <0 is returned, encoding the error as -error.
+
+.SH ERRORS
+.TP
+.B EFAULT
+.RI "we ended up beyond " maxlen .
+.TP
+.B EINVAL
+.IR root " wasn't between"
+.RB 0... NBT_NEST_MAX ,
+.RI "or this " maxlen " is too large."
+.TP
+.B EOVERFLOW
+The item length for an array or list would result in a negative value.
+.TP
+.B EMCXTAG
+An invalid tag was encountered.
+.TP
+.B EMCXITER
+.RB "The nest limit of " NBT_NEST_MAX " was reached."
+
+.SH SEE ALSO
+.BR mcx_addkey_end (3),

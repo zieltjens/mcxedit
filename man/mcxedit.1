@@ -1,107 +1,44 @@
-.\" Man page generated from reStructuredText
-.\" by the Docutils 0.23 manpage writer.
-.
-.
-.nr rst2man-indent-level 0
-.
-.de1 rstReportMargin
-\\$1 \\n[an-margin]
-level \\n[rst2man-indent-level]
-level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
--
-\\n[rst2man-indent0]
-\\n[rst2man-indent1]
-\\n[rst2man-indent2]
-..
-.de1 INDENT
-.\" .rstReportMargin pre:
-. RS \\$1
-. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
-. nr rst2man-indent-level +1
-.\" .rstReportMargin post:
-..
-.de UNINDENT
-. RE
-.\" indent \\n[an-margin]
-.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
-.nr rst2man-indent-level -1
-.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
-.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
-..
-.TH "MCXEDIT" "1" "2026-10-15" "mcxedit v0.1" "User Commands"
-.SH Name
-MCXEDIT \- A utility for processing Minecraft: Java Edition Region files.
-.\" SPDX-License-Identifier: BSD-2-Clause
-.
-.\" SPDX-FileCopyrightText: ©2026 Quinn Zieltjens <zieltjens@pigeonware.org>
-.
-.\" rst2man shows "Name", rather than "NAME", annoying, but can live with it.
-.
+\" SPDX-License-Identifier: BSD-2-Clause
+\" SPDX-FileCopyrightText: ©2026 Quinn Zieltjens <zieltjens@pigeonware.org>
+.TH MCXEDIT 1 (unknown-date) "mcxedit (unknown-version)"
+.SH NAME
+mcxedit \- utility for processing "Minecraft: Java Edition" Region files
+
 .SH SYNOPSIS
-.sp
-\fBmcxedit\fP [\fIOPTIONS\fP] \fIFILE\fP\&...
+.B mcxedit
+.RI [ OPTIONS ]\~ FILE ...
+
 .SH DESCRIPTION
-.sp
-Mcxedit is a tool used to edit region files for your
-Minecraft: Java Edition worlds. This is useful for reducing world size,
-general world management, copying chunks from one world to another,
-or various other administrative tasks.
+.B mcxedit
+is a tool used to edit regioud files for your "Minecraft: Java Edition" worlds.
+This is useful for reducing world size, general world management, copying chunks
+from one world to another, or various other administrative tasks.
+
 .SH OPTIONS
-.sp
-Options are read as \(dqflags\(dq, thus the order does not matter
-(it will generally perform actions in the order given here.)
-The order in which the flags are given is only relevant if it affects
-whether another option is set, or if stated otherwise.
-.sp
-By default, with no flags given, the programme performs some high\-level
-file size based checks on the file, for more thorough checking
-\fB\-c\fP can be specified.
-.sp
-\-c
-Performs superficial checks using estimated file sizes from the table.
-This\(aqll detect \(dqbad\(dq chunks, but won\(aqt pinpoint which chunks will be fixed.
-.sp
-\-R:
-Attempts to repair the file to the best of its ability.
-Invalid chunk entries in the table will be zeroed out, leaving the previously
-allocated sectors unused, you may wish to combine with \fB\-G\fP
-to delete these as well. If data is present, an attempt will be made to recover
-whatever is there, though Minecraft itself may be better at this job.
-.sp
-\-G
-Performs defragmentation upon the file, updating the table & deleting unused
-sectors.
-Fails if the file\(aqs size does not match the expected size, indicating corruption.
-You may wish to combine with \fB\-R\fP, if this happens.
-.sp
-\-q:
-Silences non\-fatal errors.
-.sp
-\-v:
-Enable the printing of more information on what actions are taken.
-.sp
-\-V:
-Outputs version information & exits.
-.sp
-\-h:
-Shows a brief explanation on the options available for the programme.
+
+\" TODO: Document further options
+\" API as of now is too unstable to make any final decisions on what
+\" these options should be or do.
+
+.TP
+.B -q
+Silences non-fatal errors.
+
+.TP
+.B -v
+Prints the software version
+and prints more verbose information about the files.
+
+.TP
+.B -h
+Shows a brief explanation on the options available.
 Adding potentially useful mnemonics.
+
+.TP
+.B --
+End of options, remaining arguments are treated as file paths.
+
 .SH EXIT STATUS
-.sp
-0 on success. 1 if any of \fIFILE\fP\&... had an issue, in which case
-an error is (usually) printed to STDERR.
-.SH EXAMPLES
-.sp
-TODO: W.I.P.
-.SH SEE ALSO
-.INDENT 0.0
-.IP \(bu 2
-\%<https://\:minecraft\:.wiki/\:w/\:Java_Edition>
-.IP \(bu 2
-\%<https://\:minecraft\:.wiki/\:w/\:Region_file_format>
-.IP \(bu 2
-\%<https://\:minecraft\:.wiki/\:w/\:Anvil_file_format>
-.IP \(bu 2
-\%<https://\:minecraft\:.wiki/\:w/\:Chunk>
-.UNINDENT
-.\" End of generated man page.
+0 is on success, 1 if any of
+.IR FILE "... had an issue,"
+.RI "in which case an error is (usually) printed to " stderr .

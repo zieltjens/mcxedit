@@ -1,0 +1,38 @@
+\" SPDX-License-Identifier: BSD-2-Clause
+\" SPDX-FileCopyrightText: ©2026 Quinn Zieltjens <zieltjens@pigeonware.org>
+.TH mcx_strerror 3 (unknown-date) "mcxedit (unknown-version)"
+.SH NAME
+mcx_strerror \- get error string for mcxedit library
+
+.SH LIBRARY
+libmcx
+.RI ( libmcx ,\~ \-lmcx )
+
+.SH SYNOPSIS
+.nf
+.B #include <libmcx/error.h>
+.P
+.BI "const char *mcx_strerror(int " code );
+
+.SH DESCRIPTION
+.P
+.I code
+should contain the error value, and may not be less than 0.
+.P
+This function invokes
+.BR strerror (3)
+for errors not specific to mcxedit.
+This function will therefore work for standard C error codes.
+All libmcx error codes are >0x1000, and shouldn't conflict with
+any system codes.
+
+.SH RETURN VALUE
+Returns a pointer to the error string, or NULL if the error code was invalid.
+This pointer does not need to be freed.
+
+.SH SEE ALSO
+.BR strerror (3),
+.BR perror (3),
+.BR printf (3),
+.BR puts (3),
+.BR err (3)
