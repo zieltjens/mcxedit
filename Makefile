@@ -156,26 +156,39 @@ install: libmcx.dll
 uninstall:
 	$(error Windows uninstall unsupported at this time.)
 else
-__install_bin: mcxedit
+install_bin=mcxedit
+install_lib=libmcx.so libmcx.a
+install_man=${manpaths}
+%.install_bin: % FORCE
 	@${msg} INSTALL $<
-	$Q${INSTALL_EXEC} $< ${DESTDIR}${bindir}
-__install_lib: libmcx.so libmcx.a
+	$Q${INSTALL_EXEC} $< ${DESTDIR}${bindir}/$(notdir $<)
+%.install_lib: % FORCE
 	@${msg} INSTALL $<
-	$Q${INSTALL_EXEC} $< ${DESTDIR}${libdir}
-__install_man: ${manpaths}
+	$Q${INSTALL_EXEC} $< ${DESTDIR}${libdir}/$(notdir $<)
+%.install_man: % FORCE
 	@${msg} INSTALL $<
 	$Q${INSTALL} $< ${DESTDIR}${mandir}/man$(patsubst .%,%,\
-		$(suffix $(basename $<)))
-install: __install_bin __install_lib __install_man
-uninstall:
-	$Q${RM} -v\
-		${DESTDIR}${libdir}/libmcx.so\
-		${DESTDIR}${libdir}/libmcx.a\
-		${DESTDIR}${bindir}/mcxedit\
-		$(foreach man,${manuals},\
-			${DESTDIR}${mandir}/man$(patsubst .%,%,\
-			$(suffix $(basename ${man})))/${man})
-PHONY += __install_bin __install_lib __install_man
+		$(suffix $(basename $<)))/$(notdir $<)
+install: $(addsuffix .install_bin,${install_bin})
+install: $(addsuffix .install_lib,${install_lib})
+install: $(addsuffix .install_man,${install_man})
+%.uninstall_bin: % FORCE
+	@${msg} RM $<
+	$Q${RM} $(addprefix ${DESTDIR}${bindir}/,$(notdir $<))
+%.uninstall_lib: % FORCE
+	@${msg} RM $<
+	$Q${RM} $(addprefix ${DESTDIR}${libdir}/,$(notdir $<))
+%.uninstall_man: % FORCE
+	@${msg} RM $<
+	$Q${RM} ${DESTDIR}${mandir}/man$(patsubst .%,%,\
+		$(suffix $(basename $<)))/$(notdir $<)
+uninstall: $(addsuffix .uninstall_bin,${install_bin})
+uninstall: $(addsuffix .uninstall_lib,${install_lib})
+uninstall: $(addsuffix .uninstall_man,${install_man})
+PHONY += install uninstall
 endif
+
+PHONY += FORCE
+FORCE:
 
 .PHONY: all test manpages clean install uninstall ${PHONY}
