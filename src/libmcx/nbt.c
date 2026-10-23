@@ -50,6 +50,8 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 		 * messy at best.  Consider *just* storing data for
 		 * lists, have it be any non-list value otherwise. */
 		if (!depth || cache->tags[depth-1] != NBT_LIST) {
+			if (tmp+1 > max)
+				return -EFAULT;
 			id = *tmp++;
 
 			if (id == NBT_END)
@@ -62,7 +64,7 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 
 			if (id < PRIMITIVES) {
 				tmp += nbt_primitive_size[id];
-				goto check_and_continue;
+				continue;
 			}
 		} else {
 			/* Lists are a bitch to parse. */
@@ -78,7 +80,7 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 				return -EFAULT;
 
 			tmp += unaligned_read_be16(tmp) + 2;
-			goto check_and_continue;
+			continue;
 		case NBT_LIST:
 			/* NOTE: If we're in a list of lists, this write will
 			 * be redundant. */
@@ -102,7 +104,7 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 				 * I don't know what the Minecraft code does,
 				 * nor do I see this as too big of an issue. */
 				tmp += nbt_primitive_size[id] * n;
-				goto check_and_continue;
+				continue;
 			}
 			cache->lens[depth] = n;
 			if (tmp > max) return -EFAULT;
@@ -118,7 +120,7 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 			s32 n = unaligned_read_be32(tmp);
 			if (n < 0) return -EOVERFLOW;
 			tmp += nbt_primitive_size[id] * n + 4;
-			goto check_and_continue;
+			continue;
 		}
 		return -EMCXTAG;
 depth_increase:
@@ -133,12 +135,6 @@ depth_decrease:
 		if (depth == root) break;
 		depth--;
 		continue;
-check_and_continue:
-		/* TODO: Check if taglen is correct,
-		 * but means moving to the end of the buffer,
-		 * will this result in EFAULT? */
-		if (tmp < max) continue;
-		return -EFAULT;
 	} while (depth != root);
 	return tmp - tag;
 }
