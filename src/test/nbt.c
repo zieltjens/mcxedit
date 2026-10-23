@@ -62,7 +62,6 @@ static __maybe_unused ssize_t addkey_compound(u8 *buf, u8 *max,
 static int nbt_taglen_list_of_lists(void)
 {
 	u8 *buf = nbtdat;
-	buf += addkey_compound(buf, nbtdatmax, "root");
 	buf += addkey_list(buf, nbtdatmax, "list", NBT_LIST, 3);
 	buf += addkey_list(buf, nbtdatmax, NULL, NBT_COMPOUND, 1);
 	buf += addkey_str(buf, nbtdatmax, "Hi!", "sloink");
@@ -75,7 +74,6 @@ static int nbt_taglen_list_of_lists(void)
 	buf += addkey_str(buf, nbtdatmax, NULL, "UwU");
 	buf += addkey_list(buf, nbtdatmax, NULL, NBT_F64, 1);
 	buf += addkey_float(buf, nbtdatmax, NULL, NBT_F64, 0.5f);
-	buf += addkey_end(buf, nbtdatmax);
 
 	ssize_t expected = buf - nbtdat;
 	ssize_t acquired = nbt_taglen(nbtdat, expected, 0, &cache);
@@ -87,3 +85,34 @@ static int nbt_taglen_list_of_lists(void)
 	return !(acquired == expected);
 }
 test_register(nbt_taglen_list_of_lists);
+
+static int nbt_taglen_value(void)
+{
+	u8 *buf = nbtdat;
+	buf += addkey_int(buf, nbtdatmax, "value", NBT_S32, 0x50505050);
+	ssize_t expected = buf - nbtdat;
+	ssize_t acquired = nbt_taglen(nbtdat, expected, 0, &cache);
+	if (acquired < 0)
+		testmsg("%s\n", mcx_strerror(-acquired));
+	if (acquired != expected)
+		testmsg("expected: %lld, acquired: %lld\n",
+			(llong)expected, (llong)acquired);
+	return !(acquired == expected);
+}
+test_register(nbt_taglen_value);
+
+static int nbt_taglen_compound(void)
+{
+	u8 *buf = nbtdat;
+	buf += addkey_compound(buf, nbtdatmax, "root");
+	buf += addkey_end(buf, nbtdatmax);
+	ssize_t expected = buf - nbtdat;
+	ssize_t acquired = nbt_taglen(nbtdat, expected, 0, &cache);
+	if (acquired < 0)
+		testmsg("%s\n", mcx_strerror(-acquired));
+	if (acquired != expected)
+		testmsg("expected: %lld, acquired: %lld\n",
+			(llong)expected, (llong)acquired);
+	return !(acquired == expected);
+}
+test_register(nbt_taglen_compound);
