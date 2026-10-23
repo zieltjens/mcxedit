@@ -79,11 +79,11 @@ static int nbt_taglen_list_of_lists(void)
 
 	ssize_t expected = buf - nbtdat;
 	ssize_t acquired = nbt_taglen(nbtdat, expected, 0, &cache);
-	if (acquired < 0) {
-		testlog(-1, "received error: %s\n", mcx_strerror(-acquired));
-		return -1;
-	}
-	testmsg("expected: %zu, acquired: %zu\n", expected, acquired);
-	return !(expected == acquired);
+	if (acquired < 0)
+		testmsg("%s\n", mcx_strerror(-acquired));
+	if (acquired != expected)
+		testmsg("expected: %lld, acquired: %lld\n",
+			(llong)expected, (llong)acquired);
+	return !(acquired == expected);
 }
 test_register(nbt_taglen_list_of_lists);
