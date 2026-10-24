@@ -170,16 +170,16 @@ install_man=${manpaths}
 install: $(addsuffix .install_bin,${install_bin})
 install: $(addsuffix .install_lib,${install_lib})
 install: $(addsuffix .install_man,${install_man})
-%.uninstall_bin: % FORCE
-	@${msg} RM $<
-	$Q${RM} $(addprefix ${DESTDIR}${bindir}/,$(notdir $<))
-%.uninstall_lib: % FORCE
-	@${msg} RM $<
-	$Q${RM} $(addprefix ${DESTDIR}${libdir}/,$(notdir $<))
-%.uninstall_man: % FORCE
-	@${msg} RM $<
+%.uninstall_bin: FORCE
+	@${msg} RM $*
+	$Q${RM} ${DESTDIR}${bindir}/${*F}
+%.uninstall_lib: FORCE
+	@${msg} RM $*
+	$Q${RM} ${DESTDIR}${libdir}/${*F}
+%.uninstall_man: FORCE
+	@${msg} RM $*
 	$Q${RM} ${DESTDIR}${mandir}/man$(patsubst .%,%,\
-		$(suffix $(basename $<)))/$(notdir $<)
+		$(suffix $(basename $*)))/${*F}
 uninstall: $(addsuffix .uninstall_bin,${install_bin})
 uninstall: $(addsuffix .uninstall_lib,${install_lib})
 uninstall: $(addsuffix .uninstall_man,${install_man})
