@@ -330,6 +330,8 @@ ssize_t nbt_addkey_str(u8 *buf, u8 *max,
 ssize_t nbt_addkey_list(u8 *buf, u8 *max,
 	const char *restrict name, enum nbt_tagid id, s32 len)
 {
+	if (0 > id || id >= sizeof(nbt_primitive_size))
+		return -EINVAL;
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
 	if (len < 0)
