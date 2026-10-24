@@ -46,6 +46,8 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 		 * nightmare that they do.  Index [depth] will contain the list
 		 * type, and index [depth-1] equates to NBT_LIST if we're
 		 * parsing a list item. */
+		/* BUG: depth/cache gets affected by previous cache state. */
+		/* BUG: depth/root parameter will not correctly handle cache. */
 		/* TODO: The way depth and the cache are handled is
 		 * messy at best.  Consider *just* storing data for
 		 * lists, have it be any non-list value otherwise. */
