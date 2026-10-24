@@ -152,7 +152,7 @@ static ssize_t nbt_copy_str(u8 *buf, u8 *max,
 		if (head >= max)
 			return -EFAULT;
 		if (n >= 0xFFFF)
-			return -EINVAL;
+			return -EOVERFLOW;
 		*head++ = *str++;
 		n++;
 	}
