@@ -100,6 +100,8 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 			if (n < 0) return -EOVERFLOW;
 			tmp += 4;
 
+			if (n == 0) continue;
+
 			/* NOTE: TAG_END is allowed, but has a size of 0. */
 			if (id < PRIMITIVES) {
 				/* TODO: Test how Minecraft treats depth.*/
