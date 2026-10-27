@@ -21,6 +21,9 @@ static const u8 nbt_primitive_size[] = {
 	[NBT_S64]      = 8,
 	[NBT_F32]      = 4,
 	[NBT_F64]      = 8,
+
+	/* Non-primitive items instead contain
+	 * the size of the primitive type they store */
 	[NBT_ARR_S8]   = 1,
 	[NBT_STR]      = 1,
 	[NBT_LIST]     = -1,
