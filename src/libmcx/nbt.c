@@ -29,6 +29,13 @@ static const u8 nbt_primitive_size[] = {
 	[NBT_ARR_S64]  = 8,
 };
 
+/* If (for whatever reason) cache needs to be expanded in the future,
+ * here's my suggested method for doing so:
+ *   Instead of the cache being 512 entries, we'll use a dynamic array of which
+ *   each item will contain the cache entry. Due to padding, this'll be 8 bytes.
+ *   We can use those 3 extra bytes, though I'd start with 2 as a count.
+ *   This count will increment for compounds, "depth" is only ever decremented
+ *   if this count is 0. (so, a list) */
 ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 	struct nbt_cache *restrict cache)
 {
@@ -37,21 +44,17 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 	if ((ssize_t)maxlen < 0)
 		return -EINVAL;
 
+	/* This ensures we're working with a clean cache.
+	 * (in case it's corrupt due to an error) */
+	cache->lens[root] = 0;
+	cache->tags[root] = 0;
+
 	int depth = root;
 	enum nbt_tagid id;
 	const u8 *tmp = tag;
 	const u8 *max = tag + maxlen;
 	do {
-		/* The cache is used for allowing lists to create the recursive
-		 * nightmare that they do.  Index [depth] will contain the list
-		 * type, and index [depth-1] equates to NBT_LIST if we're
-		 * parsing a list item. */
-		/* BUG: depth/cache gets affected by previous cache state. */
-		/* BUG: depth/root parameter will not correctly handle cache. */
-		/* TODO: The way depth and the cache are handled is
-		 * messy at best.  Consider *just* storing data for
-		 * lists, have it be any non-list value otherwise. */
-		if (!depth || cache->tags[depth-1] != NBT_LIST) {
+		if (!cache->tags[depth]) {
 			if (tmp+1 > max)
 				return -EFAULT;
 			id = *tmp++;
@@ -74,8 +77,9 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 			}
 		} else {
 			/* Lists are a bitch to parse. */
-			if (cache->lens[depth-1]-- == 0)
+			if (!cache->lens[depth])
 				goto depth_decrease;
+			cache->lens[depth]--;
 			id = cache->tags[depth];
 		}
 
@@ -88,10 +92,6 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 			tmp += unaligned_read_be16(tmp) + 2;
 			continue;
 		case NBT_LIST:
-			/* NOTE: If we're in a list of lists, this write will
-			 * be redundant. */
-			cache->tags[depth] = id;
-
 			if (tmp+5 > max)
 				return -EFAULT;
 
@@ -114,10 +114,10 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 				tmp += nbt_primitive_size[id] * n;
 				continue;
 			}
-			cache->lens[depth] = n;
-			if (tmp > max) return -EFAULT;
 			goto depth_increase;
 		case NBT_COMPOUND:
+			n  = 0;
+			id = 0;
 			goto depth_increase;
 		case NBT_ARR_S8:
 		case NBT_ARR_S32:
@@ -135,8 +135,7 @@ depth_increase:
 		depth++;
 		if (depth >= NBT_NEST_MAX)
 			return -EMCXITER;
-		/* This is safe for compound tags, even though it isn't used.
-		 * It mainly simplifies the code branches. */
+		cache->lens[depth] = n;
 		cache->tags[depth] = id;
 		continue;
 depth_decrease:

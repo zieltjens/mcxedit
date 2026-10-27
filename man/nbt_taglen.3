@@ -32,8 +32,9 @@ is the current depth we're parsing from, to ensure
 .RB "Must be a value 0..." NBT_NEST_MAX .
 .P
 .I cache
-TODO: the cache as it stands is broken,
-writing a description for this is pointless as it'll change dramatically.
+points to a structure containing the cache.
+.I root
+shall serve as the minimum index, any data below this won't be written.
 
 .SH RETURN VALUE
 On success,
