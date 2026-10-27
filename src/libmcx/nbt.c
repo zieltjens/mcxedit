@@ -51,13 +51,13 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 
 	int depth = root;
 	enum nbt_tagid id;
-	const u8 *tmp = tag;
-	const u8 *max = tag + maxlen;
+	const u8 *head = tag;
+	const u8 *max  = tag + maxlen;
 	do {
 		if (!cache->tags[depth]) {
-			if (tmp+1 > max)
+			if (head+1 > max)
 				return -EFAULT;
-			id = *tmp++;
+			id = *head++;
 
 			if (id == NBT_END) {
 				/* If we were called on an end tag,
@@ -67,12 +67,12 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 			}
 
 			/* Skip the tag name. */
-			if (tmp+2 > max)
+			if (head+2 > max)
 				return -EFAULT;
-			tmp += unaligned_read_be16(tmp) + 2;
+			head += unaligned_read_be16(head) + 2;
 
 			if (id < PRIMITIVES) {
-				tmp += nbt_primitive_size[id];
+				head += nbt_primitive_size[id];
 				continue;
 			}
 		} else {
@@ -86,19 +86,19 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 		s32 n;
 		switch (id) {
 		case NBT_STR:
-			if (tmp+2 > max)
+			if (head+2 > max)
 				return -EFAULT;
 
-			tmp += unaligned_read_be16(tmp) + 2;
+			head += unaligned_read_be16(head) + 2;
 			continue;
 		case NBT_LIST:
-			if (tmp+5 > max)
+			if (head+5 > max)
 				return -EFAULT;
 
-			id = *tmp++;
-			n = unaligned_read_be32(tmp);
+			id = *head++;
+			n = unaligned_read_be32(head);
 			if (n < 0) return -EOVERFLOW;
-			tmp += 4;
+			head += 4;
 
 			if (n == 0) continue;
 
@@ -111,7 +111,7 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 				 * code doesn't treat it as such.
 				 * I don't know what the Minecraft code does,
 				 * nor do I see this as too big of an issue. */
-				tmp += nbt_primitive_size[id] * n;
+				head += nbt_primitive_size[id] * n;
 				continue;
 			}
 			goto depth_increase;
@@ -122,12 +122,12 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 		case NBT_ARR_S8:
 		case NBT_ARR_S32:
 		case NBT_ARR_S64:
-			if (tmp+4 > max)
+			if (head+4 > max)
 				return -EFAULT;
 
-			s32 n = unaligned_read_be32(tmp);
+			s32 n = unaligned_read_be32(head);
 			if (n < 0) return -EOVERFLOW;
-			tmp += nbt_primitive_size[id] * n + 4;
+			head += nbt_primitive_size[id] * n + 4;
 			continue;
 		}
 		return -EMCXTAG;
@@ -142,7 +142,7 @@ depth_decrease:
 		depth--;
 		continue;
 	} while (depth != root);
-	return tmp - tag;
+	return head - tag;
 }
 
 /* Copies "str" to "buf+2" without NUL-terminator.
