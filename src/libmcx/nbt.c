@@ -149,8 +149,8 @@ depth_decrease:
  * If the bytes copied exceeds 0xFFFF, -EINVAL is returned.
  * The bytes copied is written to the first two bytes of buf.
  * Returns the offset in bytes from buf at which the data ended. */
-static ssize_t nbt_copy_str(u8 *buf, u8 *max,
-	const char *restrict str)
+static ssize_t nbt_copy_str(u8 *restrict buf, const u8 *max,
+	const char *str)
 {
 	u8 *head = buf+2;
 	size_t n = 0;
@@ -165,7 +165,7 @@ static ssize_t nbt_copy_str(u8 *buf, u8 *max,
 	return n + unaligned_write_be16(buf, n);
 }
 
-ssize_t nbt_addkey_end(u8 *buf, u8 *max)
+ssize_t nbt_addkey_end(u8 *restrict buf, const u8 *max)
 {
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
@@ -175,7 +175,7 @@ ssize_t nbt_addkey_end(u8 *buf, u8 *max)
 	return 1;
 }
 
-ssize_t nbt_addkey_int(u8 *buf, u8 *max,
+ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
 	const char *restrict name, enum nbt_tagid id, u64 val)
 {
 	if ((ssize_t)(max - buf) < 0)
@@ -218,7 +218,7 @@ ssize_t nbt_addkey_int(u8 *buf, u8 *max,
 	return head - buf;
 }
 
-ssize_t nbt_addkey_float(u8 *buf, u8 *max,
+ssize_t nbt_addkey_float(u8 *restrict buf, const u8 *max,
 	const char *restrict name, enum nbt_tagid id, f64 val)
 {
 	if ((ssize_t)(max - buf) < 0)
@@ -256,7 +256,7 @@ ssize_t nbt_addkey_float(u8 *buf, u8 *max,
 	return head - buf;
 }
 
-ssize_t nbt_addkey_arr(u8 *buf, u8 *max,
+ssize_t nbt_addkey_arr(u8 *restrict buf, const u8 *max,
 	const char *restrict name, enum nbt_tagid id, s32 len,
 	const void *restrict dat)
 {
@@ -311,7 +311,7 @@ ssize_t nbt_addkey_arr(u8 *buf, u8 *max,
 	return head - buf;
 }
 
-ssize_t nbt_addkey_str(u8 *buf, u8 *max,
+ssize_t nbt_addkey_str(u8 *restrict buf, const u8 *max,
 	const char *restrict name, const char *restrict str)
 {
 	if ((ssize_t)(max - buf) < 0)
@@ -333,8 +333,8 @@ ssize_t nbt_addkey_str(u8 *buf, u8 *max,
 	return n;
 }
 
-ssize_t nbt_addkey_list(u8 *buf, u8 *max,
-	const char *restrict name, enum nbt_tagid id, s32 len)
+ssize_t nbt_addkey_list(u8 *restrict buf, const u8 *max,
+	const char *name, enum nbt_tagid id, s32 len)
 {
 	if (0 > id || id >= sizeof(nbt_primitive_size))
 		return -EINVAL;
@@ -361,7 +361,7 @@ ssize_t nbt_addkey_list(u8 *buf, u8 *max,
 	return head - buf;
 }
 
-ssize_t nbt_addkey_compound(u8 *buf, u8 *max,
+ssize_t nbt_addkey_compound(u8 *restrict buf, const u8 *max,
 	const char *restrict name)
 {
 	if ((ssize_t)(max - buf) < 0)

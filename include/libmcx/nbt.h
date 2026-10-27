@@ -33,26 +33,26 @@ struct nbt_cache {
 ssize_t nbt_taglen(const uint8_t *restrict tag, size_t maxlen, int root,
 	struct nbt_cache *restrict cache);
 
-ssize_t nbt_addkey_end(uint8_t *buf, uint8_t *max);
+ssize_t nbt_addkey_end(uint8_t *restrict buf, const uint8_t *max);
 
-ssize_t nbt_addkey_int(uint8_t *buf, uint8_t *max,
-	const char *restrict name, enum nbt_tagid id, uint64_t val);
+ssize_t nbt_addkey_int(uint8_t *restrict buf,  const uint8_t *max,
+	const char *name, enum nbt_tagid id, uint64_t val);
 
-ssize_t nbt_addkey_float(uint8_t *buf, uint8_t *max,
-	const char *restrict name, enum nbt_tagid id, double val);
+ssize_t nbt_addkey_float(uint8_t *restrict buf, const uint8_t *max,
+	const char *name, enum nbt_tagid id, double val);
 
-ssize_t nbt_addkey_arr(uint8_t *buf, uint8_t *max,
-	const char *restrict name, enum nbt_tagid id, int32_t len,
-	const void *restrict dat);
+ssize_t nbt_addkey_arr(uint8_t *restrict buf, const uint8_t *max,
+	const char *name, enum nbt_tagid id, int32_t len,
+	const void *dat);
 
-ssize_t nbt_addkey_str(uint8_t *buf, uint8_t *max,
-	const char *restrict name, const char *restrict str);
+ssize_t nbt_addkey_str(uint8_t *restrict buf, const uint8_t *max,
+	const char *name, const char *str);
 
-ssize_t nbt_addkey_list(uint8_t *buf, uint8_t *max,
-	const char *restrict name, enum nbt_tagid id, int32_t len);
+ssize_t nbt_addkey_list(uint8_t *restrict buf, const uint8_t *max,
+	const char *name, enum nbt_tagid id, int32_t len);
 
-ssize_t nbt_addkey_compound(uint8_t *buf, uint8_t *max,
-	const char *restrict name);
+ssize_t nbt_addkey_compound(uint8_t *restrict buf, const uint8_t *max,
+	const char *name);
 
 int nbt_tagnamecmp(const uint8_t *tag, const char *str);
 
