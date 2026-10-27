@@ -128,7 +128,7 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 			if (head+4 > max)
 				return -EFAULT;
 
-			s32 n = unaligned_read_be32(head);
+			n = unaligned_read_be32(head);
 			if (n < 0) return -EOVERFLOW;
 			head += nbt_primitive_size[id] * n + 4;
 			continue;
