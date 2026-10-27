@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <error.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@ struct test {
 	const char *name;
 };
 
+extern bool stdout_isatty;
 extern struct test *tests;
 extern size_t testlen;
 extern size_t testcap;
@@ -30,8 +32,8 @@ extern size_t testcap;
 			testcap *= 2;                                          \
 			tests = realloc(tests, testcap * sizeof(*tests));      \
 			if (!tests) {                                          \
-				error(1, errno, "cannot realloc test array");  \
-				__builtin_unreachable();                       \
+				perror("cannot realloc test array");           \
+				exit(1);                                       \
 			}                                                      \
 		}                                                              \
 		tests[testlen].test =  func;                                   \
@@ -58,6 +60,15 @@ int test_vprintf(int res, const char *func, const char *fmt, va_list args);
 #define testeval(cond) (testlog(!(cond), #cond "\n"), cond)
 
 #ifdef TEST_IMPLEMENTATION
+#if defined(__unix__)
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#else
+#error "Unkown platform, unsure what action to take."
+#endif
+
+bool stdout_isatty = false;
 struct test *tests = NULL;
 size_t testlen = 0;
 size_t testcap = 0;
@@ -65,30 +76,53 @@ size_t testcap = 0;
 int test_main(int argc, char **argv)
 {
 	(void)argc, (void)argv; /* NOTE: Flags unneeded at this time. */
+
+#if defined(__unix__)
+	stdout_isatty = isatty(STDOUT_FILENO);
+#elif defined(_WIN32)
+	CONSOLE_SCREEN_BUFFER_INFO info;
+	HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	stdout_isatty = !GetConsoleScreenBufferInfo(stdout_handle, &info);
+#endif
+
 	/* Execute Tests. */
 	size_t n = testlen;
 	size_t success = 0;
 	struct test *test = tests;
 	while (n--) {
-		const char *str = "[\033[1;31mFAIL\033[0m] %s %zu/%zu\n";
+		const char *str = stdout_isatty
+			? "[\033[1;31mFAIL\033[0m] %s %llu/%llu\n"
+			: "[FAIL] %s %llu/%llu\n";
 		if (!test->test()) {
 			success++;
-			str = "[\033[1;32m OK \033[0m] %s %zu/%zu\n";
+			str = stdout_isatty
+				? "[\033[1;32m OK \033[0m] %s %llu/%llu\n"
+				: "[ OK ] %s %llu/%llu\n";
 		}
-		printf(str, test->name, testlen - n, testlen);
+		printf(str, test->name,
+			(unsigned long long)(testlen - n),
+			(unsigned long long)(testlen));
 		test++;
 	}
-	printf("%zu/%zu tests successful.\n", success, testlen);
+	printf("%llu/%llu tests successful.\n", success, testlen);
 	return testlen != success;
 }
 
 int test_vprintf(int res, const char *func, const char *fmt, va_list args)
 {
-	const char *status = " \033[1;32m OK \033[0m  %s\t";
+	const char *status = stdout_isatty
+		? " \033[1;32m OK \033[0m  %s\t"
+		: "  OK   %s\t";
 	if (res) {
-		status = res == TESTLOG_MSG
-			? " \033[36minfo\033[0m  %s\t"
-			: " \033[1;31mFAIL\033[0m  %s\t";
+		if (stdout_isatty) {
+			status = res == TESTLOG_MSG
+				? " \033[36minfo\033[0m  %s\t"
+				: " \033[1;31mFAIL\033[0m  %s\t";
+		} else {
+			status = res == TESTLOG_MSG
+				? " info  %s\t"
+				: " FAIL  %s\t";
+		}
 	}
 	return printf(status, func) +
 		vprintf(fmt, args);
