@@ -56,8 +56,12 @@ ssize_t nbt_taglen(const u8 *restrict tag, size_t maxlen, int root,
 				return -EFAULT;
 			id = *tmp++;
 
-			if (id == NBT_END)
+			if (id == NBT_END) {
+				/* If we were called on an end tag,
+				 * we should stop here. */
+				if (unlikely(root == depth)) break;
 				goto depth_decrease;
+			}
 
 			/* Skip the tag name. */
 			if (tmp+2 > max)
@@ -134,7 +138,6 @@ depth_increase:
 		cache->tags[depth] = id;
 		continue;
 depth_decrease:
-		if (depth == root) break;
 		depth--;
 		continue;
 	} while (depth != root);
