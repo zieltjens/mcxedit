@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 		case 'q': opt |= OPT_QUIET; break;
 		case 'v': opt |= OPT_VERBOSE; break;
 		case 'V':
-			printf("%s: %s\n", *argv, MCXEDIT_VERSION);
+			printf("%s: %s\n", *argv, VERSION);
 			return 0;
 		case 'h':
 			help_extended(0);

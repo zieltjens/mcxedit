@@ -9,9 +9,12 @@ SHELL = /bin/sh
 # (e.g. dev build) is retreived from git-describe.
 # I'll assume if you use a tarball of a specific commit,
 # you'll know what you're doing.
-VERONLY  = v0.1
-GIT_TAG := $(shell git describe --tags --match=${VERONLY} 2>/dev/null)
-VERSION := $(if ${GIT_TAG},${GIT_TAG},${VERONLY})
+VERSION_MAJOR  = 0
+VERSION_MINOR  = 1
+VERSION_EXTRA  =
+VERSION_TEXT   = v${VERSION_MAJOR}.${VERSION_MINOR}${VERSION_EXTRA}
+VERSION_EXTRA := $(shell git describe 2>/dev/null | cut -d- -sf2,3)
+VERSION_EXTRA := $(if ${VERSION_EXTRA},-,)${VERSION_EXTRA}
 
 # Definitions of the available modules and manuals.
 # This is used in later rules for calling
@@ -76,7 +79,11 @@ ARFLAGS    = -r
 # Flags that may not be overridden by the command-line
 override\
 CPPFLAGS += -U_GNU_SOURCE\
-	    -DMCXEDIT_VERSION=\"${VERSION}\" -DMCXEDIT_SOURCE\
+	    -DMCXEDIT_SOURCE\
+	    -DVERSION_MAJOR=${VERSION_MAJOR}\
+	    -DVERSION_MINOR=${VERSION_MINOR}\
+	    -DVERSION_HASEXTRA=$(if ${VERSION_EXTRA},1,0)\
+	    -DVERSION=\"${VERSION_TEXT}\"\
 	    -Iinclude
 override\
 CFLAGS   += -std=gnu17\
