@@ -90,7 +90,7 @@ CFLAGS   += -std=gnu17\
 	    -funsigned-char -fno-strict-overflow\
 	    -Wall -Wextra -Wpedantic\
 	    -Wmissing-declarations -Wmissing-prototypes -Wvla\
-	    -Werror=date-time -Werror=designated-init -Werror=return-type\
+	    -Werror=date-time -Werror=return-type\
 	    -Werror=strict-prototypes\
 	    -Wno-pointer-arith -Wno-pointer-sign -Wno-sign-compare -Wno-switch\
 	    -Wno-unused-but-set-variable -Wno-unused-const-variable\
