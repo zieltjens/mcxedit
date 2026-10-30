@@ -6,7 +6,7 @@
 SHELL = /bin/sh
 
 # Versioning info, more granular version information
-# (e.g. dev build) is retreived from git-describe.
+# (e.g. dev build) is retrieved from git-describe.
 # I'll assume if you use a tarball of a specific commit,
 # you'll know what you're doing.
 VERSION_MAJOR  = 0
