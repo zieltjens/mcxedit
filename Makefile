@@ -105,10 +105,13 @@ CFLAGS   += -std=gnu17\
 #  * Generate rules for creating .a files for each module.
 $(foreach mod,${modules},\
 $(eval ${mod}-obj := $(addprefix src/${mod}/,${${mod}-obj}))\
+$(eval all-obj    += ${${mod}-obj})\
 $(eval src/${mod}/%.o: CPPFLAGS += ${${mod}-cppflags})      \
 $(eval src/${mod}/%.o: CFLAGS   += ${${mod}-cflags})        \
 $(eval src/${mod}/${mod}.a: ${${mod}-obj})                  \
 )
+
+-include $(all-obj:%.o=%.d)
 
 mcxedit-test mcxedit-test.exe: ${test-obj} libmcx.a
 	@${msg} LD $@
