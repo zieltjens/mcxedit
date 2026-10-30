@@ -165,44 +165,33 @@ install: libmcx.dll
 uninstall:
 	$(error Windows uninstall unsupported at this time.)
 else
-install_bin=mcxedit
-install_lib=libmcx.so libmcx.a
-install_inc=$(shell find include -type f)
-install_man=${manpaths}
+install_bin     = mcxedit
+install_lib     = libmcx.so libmcx.a
+install_include = $(shell find include -type f)
+install_man     = ${manpaths}
 %.install_bin: % FORCE
-	@${msg} INSTALL $<
+	@${msg} INSTALL      ${DESTDIR}${bindir}/$(notdir $<)
 	$Q${INSTALL_EXEC} $< ${DESTDIR}${bindir}/$(notdir $<)
 %.install_lib: % FORCE
-	@${msg} INSTALL $<
+	@${msg} INSTALL      ${DESTDIR}${libdir}/$(notdir $<)
 	$Q${INSTALL_EXEC} $< ${DESTDIR}${libdir}/$(notdir $<)
-%.install_inc: % FORCE
-	@${msg} INSTALL $<
+%.install_include: % FORCE
+	@${msg} INSTALL ${DESTDIR}${incdir}/$(patsubst include/%,%,$<)
 	$Q${INSTALL} $< ${DESTDIR}${incdir}/$(patsubst include/%,%,$<)
 %.install_man: % FORCE
-	@${msg} INSTALL $<
-	$Q${INSTALL} $< ${DESTDIR}${mandir}/man$(patsubst .%,%,\
-		$(suffix $(basename $<)))/$(notdir $<)
+	@${msg} INSTALL ${DESTDIR}${mandir}/$(patsubst man/%,%,$<)
+	$Q${INSTALL} $< ${DESTDIR}${mandir}/$(patsubst man/%,%,$<)
 install: $(addsuffix .install_bin,${install_bin})
 install: $(addsuffix .install_lib,${install_lib})
-install: $(addsuffix .install_inc,${install_inc})
+install: $(addsuffix .install_include,${install_include})
 install: $(addsuffix .install_man,${install_man})
-%.uninstall_bin: FORCE
+%.uninstall: FORCE
 	@${msg} RM $*
-	$Q${RM} ${DESTDIR}${bindir}/${*F}
-%.uninstall_lib: FORCE
-	@${msg} RM $*
-	$Q${RM} ${DESTDIR}${libdir}/${*F}
-%.uninstall_inc: FORCE
-	@${msg} RM $*
-	$Q${RM} -r ${DESTDIR}${incdir}/$(patsubst include/%,%,$*)
-%.uninstall_man: FORCE
-	@${msg} RM $*
-	$Q${RM} ${DESTDIR}${mandir}/man$(patsubst .%,%,\
-		$(suffix $(basename $*)))/${*F}
-uninstall: $(addsuffix .uninstall_bin,${install_bin})
-uninstall: $(addsuffix .uninstall_lib,${install_lib})
-uninstall: $(addsuffix .uninstall_inc,$(dir ${install_inc}))
-uninstall: $(addsuffix .uninstall_man,${install_man})
+	$Q${RM} -r $*
+uninstall: $(patsubst %,${DESTDIR}${bindir}/%.uninstall,$(notdir ${install_bin}))
+uninstall: $(patsubst %,${DESTDIR}${libdir}/%.uninstall,$(notdir ${install_lib}))
+uninstall: $(patsubst include/%,${DESTDIR}${incdir}/%.uninstall,${install_inc})
+uninstall: $(patsubst man/%,${DESTDIR}${mandir}/%.uninstall,${install_man})
 PHONY += install uninstall
 endif
 
