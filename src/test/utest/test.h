@@ -3,8 +3,6 @@
  */
 #ifndef UTEST_TEST_H
 #define UTEST_TEST_H 1
-#include <errno.h>
-#include <error.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -104,7 +102,9 @@ int test_main(int argc, char **argv)
 			(unsigned long long)(testlen));
 		test++;
 	}
-	printf("%llu/%llu tests successful.\n", success, testlen);
+	printf("%llu/%llu tests successful.\n",
+		(unsigned long long)success,
+		(unsigned long long)testlen);
 	return testlen != success;
 }
 
@@ -124,8 +124,13 @@ int test_vprintf(int res, const char *func, const char *fmt, va_list args)
 				: " FAIL  %s\t";
 		}
 	}
-	return printf(status, func) +
-		vprintf(fmt, args);
+	int n1, n2;
+	if ((n1 = printf(status, func)) < 0)
+		return n1;
+	if ((n2 = vprintf(fmt, args)) < 0)
+		return n2;
+	return n1 + n2;
+
 }
 int test_printf(int res, const char *func, const char *fmt, ...)
 {
