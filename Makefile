@@ -165,10 +165,10 @@ install: libmcx.dll
 uninstall:
 	$(error Windows uninstall unsupported at this time.)
 else
-install_bin     = mcxedit
-install_lib     = libmcx.so libmcx.a
-install_include = $(shell find include -type f)
-install_man     = ${manpaths}
+install_bin      = mcxedit
+install_lib      = libmcx.so libmcx.a
+install_include := $(shell find include -type f)
+install_man     := ${manpaths}
 %.install_bin: % FORCE
 	@${msg} INSTALL      ${DESTDIR}${bindir}/$(notdir $<)
 	$Q${INSTALL_EXEC} $< ${DESTDIR}${bindir}/$(notdir $<)
