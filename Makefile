@@ -190,7 +190,7 @@ install: $(addsuffix .install_man,${install_man})
 	$Q${RM} -r $*
 uninstall: $(patsubst %,${DESTDIR}${bindir}/%.uninstall,$(notdir ${install_bin}))
 uninstall: $(patsubst %,${DESTDIR}${libdir}/%.uninstall,$(notdir ${install_lib}))
-uninstall: $(patsubst include/%,${DESTDIR}${incdir}/%.uninstall,${install_inc})
+uninstall: $(patsubst include/%,${DESTDIR}${incdir}/%.uninstall,${install_include})
 uninstall: $(patsubst man/%,${DESTDIR}${mandir}/%.uninstall,${install_man})
 PHONY += install uninstall
 endif
