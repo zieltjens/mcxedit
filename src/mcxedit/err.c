@@ -19,15 +19,15 @@
 static void windows_print_error(void)
 {
 	void *buf;
-	DWORD e = GetLastError();
-	DWORD n = FormatMessageA(
+	u32 e = GetLastError();
+	u32 n = FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER |
 			FORMAT_MESSAGE_FROM_SYSTEM |
 			FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		e,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPSTR)&buf, 0, NULL);
+		(char *)&buf, 0, NULL);
 	if (n != 0) {
 		fputs(buf, stderr);
 		LocalFree(buf);
