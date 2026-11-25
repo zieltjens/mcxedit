@@ -4,7 +4,7 @@
 #include "getopt.h"
 
 #include <assert.h>
-#include <libmcx/types.h>
+#include <libmcx/common.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

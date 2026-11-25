@@ -3,7 +3,7 @@
  */
 #ifndef LIBMCX_ERROR_H
 #define LIBMCX_ERROR_H 1
-#include <libmcx/stddef.h>
+#include <libmcx/common.h>
 
 /*
  * Error values are defined sequentially from 4096 (0x1000) to not collide

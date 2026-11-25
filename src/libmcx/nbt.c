@@ -5,8 +5,8 @@
 
 #include "endian.h"
 #include <errno.h>
+#include <libmcx/common.h>
 #include <libmcx/error.h>
-#include <libmcx/types.h>
 #include <stddef.h>
 #include <string.h>
 #include <sys/types.h>

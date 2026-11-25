@@ -4,8 +4,7 @@
 #ifndef MCXEDIT_ENDIAN_H
 #define MCXEDIT_ENDIAN_H 1
 
-#include <libmcx/stddef.h>
-#include <libmcx/types.h>
+#include <libmcx/common.h>
 
 /* Mostly copied from Linux using:
  * $ grep HAVE_EFFICIENT_UNALIGNED_ACCESS arch/.../Kconfig

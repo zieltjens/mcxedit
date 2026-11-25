@@ -4,7 +4,7 @@
 #include <libmcx/mcx.h>
 
 #include <errno.h>
-#include <libmcx/types.h>
+#include <libmcx/common.h>
 #include <stdlib.h>
 #include <string.h>
 

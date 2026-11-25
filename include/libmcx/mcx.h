@@ -4,8 +4,7 @@
 #ifndef LIBMCX_MCX_H
 #define LIBMCX_MCX_H 1
 
-#include <libmcx/stddef.h>
-#include <libmcx/types.h>
+#include <libmcx/common.h>
 #include <stdio.h>
 
 #define MCX_SECTOR_SIZE  0x1000

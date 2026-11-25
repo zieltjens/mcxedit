@@ -7,9 +7,8 @@
 #include "getopt.h"
 #include <assert.h>
 #include <errno.h>
+#include <libmcx/common.h>
 #include <libmcx/mcx.h>
-#include <libmcx/stddef.h>
-#include <libmcx/types.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
