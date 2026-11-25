@@ -3,4 +3,3 @@
 
 libmcx-cflags = -fPIC
 libmcx-obj = error.o mcx.o nbt.o
--include $(libmcx-obj:%.o=%.d)
