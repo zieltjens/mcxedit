@@ -7,12 +7,12 @@
 #include <libmcx/stddef.h>
 #include <stdarg.h>
 
-void verr(int code, const char *fmt, va_list args)  MCX_COLD MCX_NORET;
-void verrx(int code, const char *fmt, va_list args) MCX_COLD MCX_NORET;
+noreturn void verr(int code, const char *fmt, va_list args)  MCX_COLD;
+noreturn void verrx(int code, const char *fmt, va_list args) MCX_COLD;
 void vwarn(const char *fmt, va_list args)  MCX_COLD;
 void vwarnx(const char *fmt, va_list args) MCX_COLD;
-void err(int code, const char *fmt, ...)  MCX_COLD MCX_NORET MCX_PRINTF(2, 3);
-void errx(int code, const char *fmt, ...) MCX_COLD MCX_NORET MCX_PRINTF(2, 3);
+noreturn void err(int code, const char *fmt, ...)  MCX_COLD MCX_PRINTF(2, 3);
+noreturn void errx(int code, const char *fmt, ...) MCX_COLD MCX_PRINTF(2, 3);
 void warn(const char *fmt, ...)  MCX_COLD MCX_PRINTF(1, 2);
 void warnx(const char *fmt, ...) MCX_COLD MCX_PRINTF(1, 2);
 

@@ -222,7 +222,7 @@ ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
 }
 
 ssize_t nbt_addkey_float(u8 *restrict buf, const u8 *max,
-	const char *restrict name, enum nbt_tagid id, f64 val)
+	const char *restrict name, enum nbt_tagid id, double val)
 {
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;

@@ -29,12 +29,12 @@ enum options {
 const char *argv0;
 static int  signaled = 0;
 
-static inline MCX_NORET void help_short(int code)
+static noreturn inline void help_short(int code)
 {
 	fprintf(stderr,  "Try '%s -h' for help.\n", argv0);
 	exit(code);
 }
-static inline MCX_NORET void help_extended(int code)
+static noreturn inline void help_extended(int code)
 {
 	fprintf(stderr,
 	"%s [options] /path/to/region1 ...\n"

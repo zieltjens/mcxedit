@@ -23,7 +23,7 @@ static __maybe_unused ssize_t addkey_int(u8 *buf, u8 *max,
 	return n;
 }
 static __maybe_unused ssize_t addkey_float(u8 *buf, u8 *max,
-	const char *restrict name, enum nbt_tagid id, f64 val)
+	const char *restrict name, enum nbt_tagid id, double val)
 {
 	ssize_t n = nbt_addkey_float(buf, max, name, id, val);
 	if (n<0) testmsg("%s\n", mcx_strerror(-n));
