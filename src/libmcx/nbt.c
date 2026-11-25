@@ -168,6 +168,21 @@ static ssize_t nbt_copy_str(u8 *restrict buf, const u8 *max,
 	return n + unaligned_write_be16(buf, n);
 }
 
+static ssize_t nbt_add_header(u8 *restrict buf, const u8 *max,
+                            const char *name, enum nbt_tagid id)
+{
+	u8 *head = buf;
+	if (name) {
+		if (buf == max)
+			return -EFAULT;
+		*head++ = id;
+		ssize_t n = nbt_copy_str(head, max, name);
+		if (n < 0) return n;
+		head += n;
+	}
+	return head - buf;
+}
+
 ssize_t nbt_addkey_end(u8 *restrict buf, const u8 *max)
 {
 	if ((ssize_t)(max - buf) < 0)
@@ -183,36 +198,28 @@ ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
 {
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
+	if ((unsigned)id >= PRIMITIVES)
+		return -EINVAL;
 	u8 *head = buf;
 
-	if (name) {
-		if (buf == max)
-			return -EFAULT;
-		*head++ = id;
-		ssize_t n = nbt_copy_str(head, max, name);
-		if (n < 0) return n;
-		head += n;
-	}
+	ssize_t n = nbt_add_header(buf, max, name, id);
+	if (n < 0) return n;
+	head += n;
+
+	if (head + nbt_primitive_size[id] > max)
+		return -EFAULT;
 
 	switch (id) {
 	case NBT_S8:
-		if (head+1 > max)
-			return -EFAULT;
 		*head++ = val;
 		break;
 	case NBT_S16:
-		if (head+2 > max)
-			return -EFAULT;
 		head += unaligned_write_be16(head, val);
 		break;
 	case NBT_S32:
-		if (head+4 > max)
-			return -EFAULT;
 		head += unaligned_write_be32(head, val);
 		break;
 	case NBT_S64:
-		if (head+8 > max)
-			return -EFAULT;
 		head += unaligned_write_be64(head, val);
 		break;
 	default:
@@ -224,34 +231,28 @@ ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
 ssize_t nbt_addkey_float(u8 *restrict buf, const u8 *max,
 	const char *restrict name, enum nbt_tagid id, double val)
 {
+	if ((unsigned)id >= PRIMITIVES)
+		return -EINVAL;
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
 	u8 *head = buf;
 
-	if (name) {
-		if (buf == max)
-			return -EFAULT;
-		*head++ = id;
-		ssize_t n = nbt_copy_str(head, max, name);
-		if (n < 0) return n;
-		head += n;
-	}
+	ssize_t n = nbt_add_header(buf, max, name, id);
+	if (n < 0) return n;
+	head += n;
 
 	union {f32 f32; u32 u32;} flt = {.f32 = val};
 	union {f64 f64; u64 u64;} dbl = {.f64 = val};
 
+	if (head + nbt_primitive_size[id] > max)
+		return -EFAULT;
+
 	switch (id) {
 	case NBT_F32:
-		if (head+4 > max)
-			return -EFAULT;
-		unaligned_write_be32(head, flt.u32);
-		head += 4;
+		head += unaligned_write_be32(head, flt.u32);
 		break;
 	case NBT_F64:
-		if (head+8 > max)
-			return -EFAULT;
-		unaligned_write_be64(head, dbl.u64);
-		head += 8;
+		head += unaligned_write_be64(head, dbl.u64);
 		break;
 	default:
 		return -EINVAL;
@@ -271,14 +272,9 @@ ssize_t nbt_addkey_arr(u8 *restrict buf, const u8 *max,
 		return -EINVAL;
 	u8 *head = buf;
 
-	if (name) {
-		if (buf == max)
-			return -EFAULT;
-		*head++ = id;
-		ssize_t n = nbt_copy_str(head, max, name);
-		if (n < 0) return n;
-		head += n;
-	}
+	ssize_t n = nbt_add_header(buf, max, name, id);
+	if (n < 0) return n;
+	head += n;
 
 	int membsize = nbt_primitive_size[id];
 	size_t size = len * membsize;
@@ -320,20 +316,16 @@ ssize_t nbt_addkey_str(u8 *restrict buf, const u8 *max,
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
 	u8 *head = buf;
+	ssize_t n;
 
-	if (name) {
-		if (buf == max)
-			return -EFAULT;
-		*head++ = NBT_STR;
-		ssize_t n = nbt_copy_str(head, max, name);
-		if (n < 0) return n;
-		head += n;
-	}
-
-	ssize_t n = nbt_copy_str(head, max, str);
+	n = nbt_add_header(buf, max, name, NBT_STR);
 	if (n < 0) return n;
-	n += head-buf;
-	return n;
+	head += n;
+
+	n = nbt_copy_str(head, max, str);
+	if (n < 0) return n;
+	head += n;
+	return head - buf;
 }
 
 ssize_t nbt_addkey_list(u8 *restrict buf, const u8 *max,
@@ -347,14 +339,9 @@ ssize_t nbt_addkey_list(u8 *restrict buf, const u8 *max,
 		return -EINVAL;
 	u8 *head = buf;
 
-	if (name) {
-		if (buf == max)
-			return -EFAULT;
-		*head++ = NBT_LIST;
-		ssize_t n = nbt_copy_str(head, max, name);
-		if (n < 0) return n;
-		head += n;
-	}
+	ssize_t n = nbt_add_header(buf, max, name, NBT_LIST);
+	if (n < 0) return n;
+	head += n;
 
 	if (head+5 > max)
 		return -EFAULT;
@@ -371,15 +358,10 @@ ssize_t nbt_addkey_compound(u8 *restrict buf, const u8 *max,
 		return -EINVAL;
 	u8 *head = buf;
 
-	if (name) {
-		if (buf == max)
-			return -EFAULT;
-		*head++ = NBT_COMPOUND;
-		ssize_t n = nbt_copy_str(head, max, name);
-		if (n < 0) return n;
-		return ++n;
-	}
-	return 0;
+	ssize_t n = nbt_add_header(buf, max, name, NBT_COMPOUND);
+	if (n < 0) return n;
+	head += n;
+	return head - buf;
 }
 
 int nbt_tagnamecmp(const u8 *tag, const char *str)
