@@ -14,6 +14,10 @@
 #define MCX_TABLE_ITEMS  0x400
 #define MCX_TABLES_ITEMS 0x800
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Repairs faults in the file format,
  * outputting warnings describing the repaired fault & affected chunk.
  * Returns the size of the file, which may be larger than,
@@ -47,5 +51,9 @@ off_t mcx_calcsize(const struct mcx *mcx) MCX_PURE;
  * In the edge case of overlapping sectors, this value may be larger
  * than the actual file size. */
 off_t mcx_sumsize(const struct mcx *mcx) MCX_PURE;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIBMCX_MCX_H */

@@ -15,8 +15,16 @@
 #define EMCXTAG  0x1000 /* Invalid binary tag */
 #define EMCXITER 0x1001 /* Too many iterations */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Returns a pointer to the error string,
  * or NULL if the error code was invalid. */
 const char *mcx_strerror(int code) MCX_CONST MCX_COLD;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIBMCX_ERROR_H */
