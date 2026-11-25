@@ -38,6 +38,15 @@
 
 #define unlikely(x) __builtin_expect(!!(x), 0)
 #define   likely(x) __builtin_expect(!!(x), 1)
+
+#define min(_x, _y) ({ \
+	__auto_type x = _x; \
+	__auto_type y = _y; \
+	x < y ? x : y })
+#define max(_x, _y) ({ \
+	__auto_type x = _x; \
+	__auto_type y = _y; \
+	x > y ? x : y })
 #endif /* MCXEDIT_SOURCE */
 
 #endif /* LIBMCX_ATRB_H */
