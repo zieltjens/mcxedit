@@ -43,14 +43,14 @@ struct mcx;
 #define unlikely(x) __builtin_expect(!!(x), 0)
 #define   likely(x) __builtin_expect(!!(x), 1)
 
-#define min(_x, _y) ({ \
+#define min(_x, _y) __extension__ ({ \
 	__auto_type x = _x; \
 	__auto_type y = _y; \
-	x < y ? x : y })
-#define max(_x, _y) ({ \
+	x < y ? x : y; })
+#define max(_x, _y) __extension__ ({ \
 	__auto_type x = _x; \
 	__auto_type y = _y; \
-	x > y ? x : y })
+	x > y ? x : y; })
 
 #ifdef __CHECKER__
 #define __bitwise __attribute__((bitwise))
