@@ -30,7 +30,7 @@ static int nbt_taglen_list_of_lists(void)
 	buf += logwrap(nbt_addkey_str(buf, nbtdatmax, NULL, "Haha"));
 	buf += logwrap(nbt_addkey_str(buf, nbtdatmax, NULL, "UwU"));
 	buf += logwrap(nbt_addkey_list(buf, nbtdatmax, NULL, NBT_F64, 1));
-	buf += logwrap(nbt_addkey_float(buf, nbtdatmax, NULL, NBT_F64, 0.5f));
+	buf += logwrap(nbt_addkey_f64(buf, nbtdatmax, NULL, 0.5f));
 
 	ssize_t expected = buf - nbtdat;
 	ssize_t acquired = nbt_taglen(nbtdat, expected, 0, &cache);
@@ -46,8 +46,7 @@ test_register(nbt_taglen_list_of_lists);
 static int nbt_taglen_value(void)
 {
 	u8 *buf = nbtdat;
-	buf += logwrap(nbt_addkey_int(buf, nbtdatmax, "value",
-		NBT_S32, 0x50505050));
+	buf += logwrap(nbt_addkey_s32(buf, nbtdatmax, "value", 0x50505050));
 	ssize_t expected = buf - nbtdat;
 	ssize_t acquired = nbt_taglen(nbtdat, expected, 0, &cache);
 	if (acquired < 0)

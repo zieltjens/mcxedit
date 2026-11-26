@@ -2,8 +2,10 @@
 \" SPDX-FileCopyrightText: ©2026 Quinn Zieltjens <zieltjens@pigeonware.org>
 .TH nbt_addkey_end 3 (unknown-date) "mcxedit (unknown-version)"
 .SH NAME
-nbt_addkey_end, nbt_addkey_int, nbt_addkey_float, nbt_addkey_arr,
-nbt_addkey_str, nbt_addkey_list, nbt_addkey_compund \- create a NBT tree
+nbt_addkey_end, nbt_addkey_s8, nbt_addkey_s16, nbt_addkey_s32, nbt_addkey_s64,
+nbt_addkey_f32, nbt_addkey_f64, nbt_addkey_arr_s8,
+nbt_addkey_arr_s32, nbt_addkey_arr_s64, nbt_addkey_str, nbt_addkey_list,
+nbt_addkey_compund \- create a NBT tree
 
 .SH LIBRARY
 libmcx
@@ -17,17 +19,35 @@ libmcx
 .P
 .BI "ssize_t nbt_addkey_end(uint8_t *" buf ", uint8_t *" max );
 .P
-.BI "ssize_t nbt_addkey_int(uint8_t *" buf ", uint8_t *" max ,
-.BI "                            const char *" name ", enum nbt_tagid " id ,
-.BI "                            uint64_t " value );
+.BI "ssize_t nbt_addkey_s8(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", int8_t " value );
 .P
-.BI "ssize_t nbt_addkey_float(uint8_t *" buf ", uint8_t *" max ,
-.BI "                            const char *" name ", enum nbt_tagid " id ,
-.BI "                            double " value );
+.BI "ssize_t nbt_addkey_s16(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", int16_t " value );
 .P
-.BI "ssize_t nbt_addkey_arr(uint8_t *" buf ", uint8_t *" max ,
-.BI "                            const char *" name ", enum nbt_tagid " id ,
-.BI "                            int32_t " length ", const void *" data );
+.BI "ssize_t nbt_addkey_s32(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", int32_t " value );
+.P
+.BI "ssize_t nbt_addkey_s64(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", int64_t " value );
+.P
+.BI "ssize_t nbt_addkey_f32(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", float " value );
+.P
+.BI "ssize_t nbt_addkey_f64(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", double " value );
+.P
+.BI "ssize_t nbt_addkey_arr_s8(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", const int8_t *" data ,
+.BI "                            int32_t " length );
+.P
+.BI "ssize_t nbt_addkey_arr_s32(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", const int32_t *" data ,
+.BI "                            int32_t " length );
+.P
+.BI "ssize_t nbt_addkey_arr_s64(uint8_t *" buf ", uint8_t *" max ,
+.BI "                            const char *" name ", const int64_t *" data ,
+.BI "                            int32_t " length );
 .P
 .BI "ssize_t nbt_addkey_str(uint8_t *" buf ", uint8_t *" max ,
 .BI "                            const char *" name ", const char *" value );
@@ -55,23 +75,7 @@ lists, for an empty name use "" or "\\0".
 The maximum number of characters (excluding 0 terminating byte) is 0xFFFF,
 or 65535.
 .P
-when
 .I id
-is specified, different values are valid depending on the function:
-.TP
-.B nbt_addkey_int()
-accepts
-.BR NBT_S8 ,\~ NBT_S16 ,\~ NBT_S32 ,\~ NBT_S64
-.TP
-.BR nbt_addkey_float()
-accepts
-.BR NBT_F32 ,\~ NBT_F64
-.TP
-.B nbt_addkey_arr()
-accepts
-.BR NBT_ARR_S8 ,\~ NBT_ARR_S32 ,\~ NBT_ARR_S64
-.TP
-.B nbt_addkey_list()
 accepts any value from enum nbt_tagid.
 .P
 .I length
@@ -89,7 +93,7 @@ characters (excluding 0 terminating byte) is 0xFFFF, or 65535.
 is similar to
 .I value
 except that it is expected to be a pointer to an array of
-.IR length " elements, all of which are the size described by " id .
+.IR length " items."
 
 .SH RETURN VALUE
 On success, all of these functions will return the amount of bytes written.
@@ -175,12 +179,12 @@ n = nbt_addkey_str(buf, nbtdatmax, "some string", "foo");
 if (n < 0) addkey_error(-n);
 buf += n;
 
-n = nbt_addkey_int(buf, nbtdatmax, "64-bit int", NBT_S64, 0x5050505050505050);
+n = nbt_addkey_s64(buf, nbtdatmax, "64-bit int", 0x5050505050505050);
 if (n < 0) addkey_error(-n);
 buf += n;
 
 int8_t arr[] = "Some long string that exceeds 0xFFFF, let's just pretend...";
-n = nbt_addkey_arr(buf, nbtdatmax, "long-string", NBT_ARR_S8, sizeof(arr), arr);
+n = nbt_addkey_arr_s8(buf, nbtdatmax, "long-string", arr, sizeof(arr));
 if (n < 0) addkey_error(-n);
 buf += n;
 

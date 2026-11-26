@@ -193,8 +193,8 @@ ssize_t nbt_addkey_end(u8 *restrict buf, const u8 *max)
 	return 1;
 }
 
-ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
-	const char *restrict name, enum nbt_tagid id, u64 val)
+static ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
+		const char *name, u64 val, enum nbt_tagid id)
 {
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
@@ -227,9 +227,35 @@ ssize_t nbt_addkey_int(u8 *restrict buf, const u8 *max,
 	}
 	return head - buf;
 }
+ssize_t nbt_addkey_s8(u8 *restrict buf, const u8 *max,
+		const char *name, s8 val)
+{
+	return nbt_addkey_int(buf, max, name, val, NBT_S8);
+}
+ssize_t nbt_addkey_s16(u8 *restrict buf, const u8 *max,
+		const char *name, s16 val)
+{
+	return nbt_addkey_int(buf, max, name, val, NBT_S16);
+}
+ssize_t nbt_addkey_s32(u8 *restrict buf, const u8 *max,
+		const char *name, s32 val)
+{
+	return nbt_addkey_int(buf, max, name, val, NBT_S32);
+}
+ssize_t nbt_addkey_s64(u8 *restrict buf, const u8 *max,
+		const char *name, s64 val)
+{
+	return nbt_addkey_int(buf, max, name, val, NBT_S64);
+}
 
-ssize_t nbt_addkey_float(u8 *restrict buf, const u8 *max,
-	const char *restrict name, enum nbt_tagid id, double val)
+union nbt_float {
+	u32 as_u32;
+	u64 as_u64;
+	f32 as_f32;
+	f64 as_f64;
+};
+static ssize_t nbt_addkey_float(u8 *restrict buf, const u8 *max,
+		const char *name, union nbt_float val, enum nbt_tagid id)
 {
 	if ((unsigned)id >= PRIMITIVES)
 		return -EINVAL;
@@ -241,28 +267,36 @@ ssize_t nbt_addkey_float(u8 *restrict buf, const u8 *max,
 	if (n < 0) return n;
 	head += n;
 
-	union {f32 f32; u32 u32;} flt = {.f32 = val};
-	union {f64 f64; u64 u64;} dbl = {.f64 = val};
-
 	if (head + nbt_primitive_size[id] > max)
 		return -EFAULT;
 
 	switch (id) {
 	case NBT_F32:
-		head += unaligned_write_be32(head, flt.u32);
+		head += unaligned_write_be32(head, val.as_u32);
 		break;
 	case NBT_F64:
-		head += unaligned_write_be64(head, dbl.u64);
+		head += unaligned_write_be64(head, val.as_u64);
 		break;
 	default:
 		return -EINVAL;
 	}
 	return head - buf;
 }
+ssize_t nbt_addkey_f32(u8 *restrict buf, const u8 *max,
+		const char *name, float val)
+{
+	return nbt_addkey_float(buf, max, name,
+			(union nbt_float){.as_f32 = val}, NBT_F32);
+}
+ssize_t nbt_addkey_f64(u8 *restrict buf, const u8 *max,
+		const char *name, double val)
+{
+	return nbt_addkey_float(buf, max, name,
+			(union nbt_float){.as_f64 = val}, NBT_F64);
+}
 
-ssize_t nbt_addkey_arr(u8 *restrict buf, const u8 *max,
-	const char *restrict name, enum nbt_tagid id, s32 len,
-	const void *restrict dat)
+static ssize_t nbt_addkey_arr(u8 *restrict buf, const u8 *max,
+		const char *name, const void *dat, s32 len, enum nbt_tagid id)
 {
 	if (id != NBT_ARR_S8 && id != NBT_ARR_S32 && id != NBT_ARR_S64)
 		return -EINVAL;
@@ -309,9 +343,24 @@ ssize_t nbt_addkey_arr(u8 *restrict buf, const u8 *max,
 #endif
 	return head - buf;
 }
+ssize_t nbt_addkey_arr_s8(u8 *restrict buf, const u8 *max,
+		const char *name, const s8 *dat, s32 len)
+{
+	return nbt_addkey_arr(buf, max, name, dat, len, NBT_ARR_S8);
+}
+ssize_t nbt_addkey_arr_s32(u8 *restrict buf, const u8 *max,
+		const char *name, const s32 *dat, s32 len)
+{
+	return nbt_addkey_arr(buf, max, name, dat, len, NBT_ARR_S32);
+}
+ssize_t nbt_addkey_arr_s64(u8 *restrict buf, const u8 *max,
+		const char *name, const s64 *dat, s32 len)
+{
+	return nbt_addkey_arr(buf, max, name, dat, len, NBT_ARR_S64);
+}
 
 ssize_t nbt_addkey_str(u8 *restrict buf, const u8 *max,
-	const char *restrict name, const char *restrict str)
+	const char *name, const char *str)
 {
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
@@ -351,8 +400,7 @@ ssize_t nbt_addkey_list(u8 *restrict buf, const u8 *max,
 	return head - buf;
 }
 
-ssize_t nbt_addkey_compound(u8 *restrict buf, const u8 *max,
-	const char *restrict name)
+ssize_t nbt_addkey_compound(u8 *restrict buf, const u8 *max, const char *name)
 {
 	if ((ssize_t)(max - buf) < 0)
 		return -EINVAL;
