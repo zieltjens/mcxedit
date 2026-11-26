@@ -5,7 +5,6 @@
 #define LIBMCX_STDDEF_H 1
 #include <assert.h>
 #include <stdbool.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdnoreturn.h>
 #include <sys/types.h>
@@ -83,9 +82,24 @@ typedef u16 __bitwise le16;
 typedef u32 __bitwise le32;
 typedef u64 __bitwise le64;
 
+/* Test whether float/double claim to follow IEEE 754 binary representation.
+ * In the case of clang, it is built upon LLVM, in which "float" and "double"
+ * are defined to use the IEEE 754 binary representation.
+ * <https://llvm.org/docs/LangRef.html#floating-point-types> */
 #if defined(__STDC_IEC_559__) || defined(__STDC_IEC_60559_BFP__)
 typedef float  f32;
 typedef double f64;
+#elif (defined(__GNUC__) && !defined(__clang__)) || __STDC_VERSION__ >= 202311L
+/* Use C23 extensions / GCC-specific extensions.
+ * These will only be defined if the hardware has support for this
+ * representation. But is a decent fallback. */
+__extension__ typedef _Float32 f32;
+__extension__ typedef _Float64 f64;
+#elif defined(__x86_64__) || defined(__aarch64__) || defined(__riscv__)
+typedef float  f32;
+typedef double f64;
+#else
+#error "Was unable to determine an appropriate type for f32 and f64."
 #endif
 #endif /* MCXEDIT_SOURCE */
 
