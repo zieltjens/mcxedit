@@ -117,8 +117,15 @@ The provided string in
 All examples use the following definitions:
 .P
 .EX
+#include <libmcx/error.h>
+#include <libmcx/nbt.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+
 uint8_t nbtdat[0x1000]; /* 4KiB ought to be enough. */
-uint8_t nbtdatmax = nbtdat + sizeof(nbtdat);
+uint8_t *nbtdatmax = nbtdat + sizeof(nbtdat);
 
 [[noreturn]] void addkey_error(int e)
 {
@@ -168,12 +175,12 @@ n = nbt_addkey_str(buf, nbtdatmax, "some string", "foo");
 if (n < 0) addkey_error(-n);
 buf += n;
 
-n = nbt_addkey_int(buf, nbtdatmax, "some 64 bit integer", 0x5050505050505050);
+n = nbt_addkey_int(buf, nbtdatmax, "64-bit int", NBT_S64, 0x5050505050505050);
 if (n < 0) addkey_error(-n);
 buf += n;
 
 int8_t arr[] = "Some long string that exceeds 0xFFFF, let's just pretend...";
-n = nbt_addkey_arr(buf, nbtdatmax, NBT_ARR_S8, sizeof(arr), arr);
+n = nbt_addkey_arr(buf, nbtdatmax, "long-string", NBT_ARR_S8, sizeof(arr), arr);
 if (n < 0) addkey_error(-n);
 buf += n;
 
