@@ -97,6 +97,11 @@ CFLAGS   += -std=gnu17\
 	    -Wno-unused-but-set-variable -Wno-unused-const-variable\
 	    -Wno-unused-parameter
 
+ifeq (${OS},Windows_NT)
+override\
+CPPFLAGS += -DNOMINMAX # Windows, you're a piece of shit
+endif
+
 # Include the Makefiles that define the objects and their dependencies.
 -include $(modules:%=src/%/Makefile)
 
