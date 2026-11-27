@@ -422,12 +422,3 @@ int nbt_tagnamecmp(const u8 *tag, const char *str)
 	while (n-- && *str && !(v = *str++ - *tag++));
 	return v;
 }
-
-char *nbt_popnode(char *path)
-{
-	char c;
-	do c = *path++;
-	while (c && c != '.');
-	path[-1] = '\0';
-	return c ? path : NULL;
-}

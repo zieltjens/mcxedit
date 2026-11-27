@@ -17,3 +17,4 @@ int main(int argc, char **argv)
 #include <libmcx/error.h>
 #include <libmcx/mcx.h>
 #include <libmcx/nbt.h>
+#include <libmcx/snbt.h>

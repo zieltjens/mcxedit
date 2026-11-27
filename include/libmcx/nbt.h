@@ -77,8 +77,6 @@ ssize_t nbt_addkey_compound(uint8_t *restrict buf, const uint8_t *max,
 
 int nbt_tagnamecmp(const uint8_t *tag, const char *str);
 
-char *nbt_popnode(char *path);
-
 #ifdef __cplusplus
 }
 #endif
