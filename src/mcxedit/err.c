@@ -46,7 +46,10 @@ void vwarn(const char *fmt, va_list args)
 		fputs(": ", stderr);
 	}
 #if defined(_WIN32)
-	if (!e) return windows_print_error();
+	if (!e) {
+		windows_print_error();
+		return;
+	}
 #endif
 	fprintf(stderr, "%s\n", strerror(e));
 }
